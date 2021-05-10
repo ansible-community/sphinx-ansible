@@ -1,2 +1,3 @@
 ansible_runner
 pyyaml
+ansible
