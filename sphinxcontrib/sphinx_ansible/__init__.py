@@ -6,7 +6,7 @@ from docutils.parsers.rst import Directive
 from sphinx.util.docutils import SphinxDirective
 
 import json
-import sphinxcontrib.sphinx_ansible.runner
+import sphinxcontrib.sphinx_ansible.runner as runner
 import yaml
 
 
@@ -71,7 +71,7 @@ class AnsibleTaskDirective(SphinxDirective):
         code = "\n".join(self.content)
 
         self.env.ansible_tasks.append(
-            {"docname": self.env.docname, "lineno": self.lineno, "task": yaml_data[0],}
+            {"docname": self.env.docname, "lineno": self.lineno, "task": yaml_data[0]}
         )
 
         my_ansible_task_node = ansible_task_node()
@@ -103,7 +103,7 @@ class AnsibleTasksDirective(SphinxDirective):
             task["name"] = task_id
             task_ids.append(task_id)
             self.env.ansible_tasks.append(
-                {"docname": self.env.docname, "lineno": self.lineno, "task": task,}
+                {"docname": self.env.docname, "lineno": self.lineno, "task": task}
             )
 
         my_ansible_tasks_node = ansible_tasks_node()
