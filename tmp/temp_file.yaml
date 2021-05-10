@@ -1,0 +1,10 @@
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: a first tasks
+      debug:
+        msg: Some blabla
+    - name: run uname
+      command: uname -a
+      register: result
+    - debug: var=result
