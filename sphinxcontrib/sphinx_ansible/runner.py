@@ -8,28 +8,28 @@ from sphinx.errors import ExtensionError
 
 import ansible_runner
 
-def write_play(play_content):
-    tmp_dir = pathlib.Path('tmp')
-    tmp_dir.mkdir(exist_ok=True)
-    temp_file = tmp_dir / 'temp_file.yaml'
 
-    import q
-    q(play_content)
+def write_play(play_content):
+    tmp_dir = pathlib.Path("tmp")
+    tmp_dir.mkdir(exist_ok=True)
+    temp_file = tmp_dir / "temp_file.yaml"
+
     temp_file.write_text(play_content)
-    q(temp_file)
     return temp_file
-    
+
 
 def get_outputs(play_file):
-    r = ansible_runner.run(private_data_dir=str(play_file.parent), playbook=play_file.name)
+    r = ansible_runner.run(
+        private_data_dir=str(play_file.parent), playbook=play_file.name
+    )
     if r.rc:
         raise ExtensionError("ansible execution has failed")
     outputs = {}
     for each_host_event in r.events:
-        if each_host_event['event'] == "runner_on_ok":
-            event_data = each_host_event['event_data']
-            task = each_host_event['event_data'].get('task')
-            res = each_host_event['event_data'].get('res')
+        if each_host_event["event"] == "runner_on_ok":
+            event_data = each_host_event["event_data"]
+            task = each_host_event["event_data"].get("task")
+            res = each_host_event["event_data"].get("res")
             if not (task and res):
                 continue
             if task == "Gathering Facts":
@@ -38,7 +38,6 @@ def get_outputs(play_file):
             print(f"{task}> {res}")
             outputs[task] = res
     return outputs
-
 
 
 class CodeTestBlockDirective(docutils.parsers.rst.Directive):
@@ -53,12 +52,13 @@ class CodeTestBlockDirective(docutils.parsers.rst.Directive):
         try:
             language = self.arguments[0]
         except IndexError:
-            language = ''
-        code = '\n'.join(self.content)
+            language = ""
+        code = "\n".join(self.content)
         literal = docutils.nodes.literal_block(code, code)
-        literal['classes'].append('code-test-block')
-        literal['language'] = language
+        literal["classes"].append("code-test-block")
+        literal["language"] = language
         return [literal]
+
 
 class IgnoredDirective(docutils.parsers.rst.Directive):
 
@@ -71,12 +71,11 @@ class IgnoredDirective(docutils.parsers.rst.Directive):
         return []
 
 
-
 def include_in_ansible_test_playbook(node):
-    if node.tagname == 'literal_block':
-        if 'code' in node.attributes['classes']:
+    if node.tagname == "literal_block":
+        if "code" in node.attributes["classes"]:
             return True
-        elif 'code-test-block' in node.attributes['classes']:
+        elif "code-test-block" in node.attributes["classes"]:
             return True
     return False
 
