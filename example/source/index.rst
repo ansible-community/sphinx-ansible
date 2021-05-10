@@ -23,20 +23,47 @@ This manual document something
        state: touch
 
 
-Let's do an example
+Document one plugin
 ===================
 
-Here for instance, I run an Ansible task.
+Here for instance, I want to document an Ansible plugin. This is how I will include my example in the RestructuredText file:
+
+.. code-block:: RST
+
+  .. ansible-task::
+
+     - name: foo bar
+       command: ls /tmp/foo/BAR
+
+Sphinx will generate the following output
+-----------------------------------------
 
 .. ansible-task::
 
    - name: foo bar
      command: ls /tmp/foo/BAR
 
-This is another section
-=======================
+A list of tasks
+===============
 
-And some other tasks to clean up the enviroment.
+The following blocks run two tasks
+
+.. code-block:: RST
+
+  .. ansible-tasks::
+
+     - name: Purge the file
+       file:
+         path: /tmp/foo/BAR/index.txt
+         state: absent
+     - name: And the directory
+       file:
+         path: /tmp/foo/BAR
+         state: absent
+
+
+Sphinx generates this output
+----------------------------
 
 .. ansible-tasks::
 

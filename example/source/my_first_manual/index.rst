@@ -8,6 +8,25 @@ A playbook
 
 This is my playbook.
 
+.. code-block:: RST
+
+  .. ansible-playbook::
+
+     - hosts: localhost
+       gather_facts: false
+       tasks:
+         - name: a first tasks
+           debug:
+             msg: Some blabla
+         - name: run uname
+           command: uname -a
+           register: result
+         - debug: var=result
+
+
+This is how Sphinx shows up the Playbook
+----------------------------------------
+
 .. ansible-playbook::
 
    - hosts: localhost
