@@ -24,6 +24,21 @@ Sphinx-Ansible helps you address the following scenarios:
        state: touch
 
 
+New directives
+==============
+
+This extensions add the following new extensions:
+
+- `ansible-task`: for one single task
+- `ansible-tasks`: for a list of tasks
+- `ansible-hidden-tasks`: a bunch of hidden tasks, for instance to run some `assert` checks or prepare a configuration
+- `ansible-playbook`: for a full playbook
+
+********
+examples
+********
+
+
 Document one plugin
 ===================
 
