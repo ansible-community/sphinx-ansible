@@ -3,6 +3,12 @@ This manual document something
 ******************************
 
 
+.. toctree::
+   :maxdepth: 1
+   :caption: Sphinx-Ansible examples
+
+   my_first_manual/index
+
 
 .. ansible-hidden-tasks::
 
@@ -19,9 +25,9 @@ This manual document something
 
 Let's do an example
 ===================
-       
+
 Here for instance, I run an Ansible task.
-       
+
 .. ansible-task::
 
    - name: foo bar
@@ -29,7 +35,7 @@ Here for instance, I run an Ansible task.
 
 This is another section
 =======================
-     
+
 And some other tasks to clean up the enviroment.
 
 .. ansible-tasks::

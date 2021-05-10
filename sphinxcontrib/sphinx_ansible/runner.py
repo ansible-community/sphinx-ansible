@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import pathlib
-
+import yaml
 import docutils.parsers.rst
 import docutils.core
 from sphinx.errors import ExtensionError
@@ -18,10 +18,15 @@ def write_play(play_content):
     return temp_file
 
 
-def get_outputs(play_file):
+def run_playbook(play_file):
     r = ansible_runner.run(
         private_data_dir=str(play_file.parent), playbook=play_file.name
     )
+    return r
+
+
+def get_outputs(play_file):
+    r = run_playbook(play_file)
     if r.rc:
         raise ExtensionError("ansible execution has failed")
     outputs = {}
@@ -80,7 +85,16 @@ def include_in_ansible_test_playbook(node):
     return False
 
 
-def evaluate_play(play_content):
+def evaluate_playbook(play_content):
     play_file = write_play(play_content)
     outputs = get_outputs(play_file)
     return outputs
+
+
+def evaluate_tasks(tasks):
+    playbook_content = "- hosts: localhost\n  tasks:\n"
+    for block in tasks:
+        task_str = yaml.dump([block["task"]])
+        new_lines = ["    " + l for l in task_str.split("\n")]
+        playbook_content += "\n".join(new_lines) + "\n"
+    return evaluate_playbook(playbook_content)
