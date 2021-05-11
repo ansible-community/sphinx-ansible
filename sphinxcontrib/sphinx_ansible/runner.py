@@ -9,8 +9,8 @@ from sphinx.errors import ExtensionError
 import ansible_runner
 
 
-def write_play(play_content):
-    tmp_dir = pathlib.Path("tmp")
+def write_play(play_content, tmp_dir):
+    tmp_dir = pathlib.Path(tmp_dir)
     tmp_dir.mkdir(exist_ok=True)
     temp_file = tmp_dir / "temp_file.yaml"
 
@@ -47,56 +47,16 @@ def get_outputs(play_file, roles_path=None):
     return outputs
 
 
-class CodeTestBlockDirective(docutils.parsers.rst.Directive):
-
-    """Code block directive."""
-
-    has_content = True
-    optional_arguments = 1
-
-    def run(self):
-        """Run directive."""
-        try:
-            language = self.arguments[0]
-        except IndexError:
-            language = ""
-        code = "\n".join(self.content)
-        literal = docutils.nodes.literal_block(code, code)
-        literal["classes"].append("code-test-block")
-        literal["language"] = language
-        return [literal]
-
-
-class IgnoredDirective(docutils.parsers.rst.Directive):
-
-    """Stub for unknown directives."""
-
-    has_content = True
-
-    def run(self):
-        """Do nothing."""
-        return []
-
-
-def include_in_ansible_test_playbook(node):
-    if node.tagname == "literal_block":
-        if "code" in node.attributes["classes"]:
-            return True
-        elif "code-test-block" in node.attributes["classes"]:
-            return True
-    return False
-
-
-def evaluate_playbook(play_content, roles_path=None):
-    play_file = write_play(play_content)
+def evaluate_playbook(play_content, roles_path=None, tmp_dir=None):
+    play_file = write_play(play_content, tmp_dir=tmp_dir)
     outputs = get_outputs(play_file, roles_path=roles_path)
     return outputs
 
 
-def evaluate_tasks(tasks, roles_path=None):
+def evaluate_tasks(tasks, roles_path=None, tmp_dir=None):
     playbook_content = "- hosts: localhost\n  tasks:\n"
     for block in tasks:
         task_str = yaml.dump([block["task"]])
         new_lines = ["    " + l for l in task_str.split("\n")]
         playbook_content += "\n".join(new_lines) + "\n"
-    return evaluate_playbook(playbook_content, roles_path=roles_path)
+    return evaluate_playbook(playbook_content, roles_path=roles_path, tmp_dir=tmp_dir)

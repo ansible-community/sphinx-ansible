@@ -40,6 +40,7 @@ Configuration keys
 The extension exposes the following configuration keys:
 
 - `ansible_roles_path`: The key accepts a list of folders.
+- `ansible_tmp_dir`: Where to write the temporary Playbook. e.g: ``/tmp/sphinx-ansible``.
 
 ********
 examples
