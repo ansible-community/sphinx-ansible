@@ -162,7 +162,9 @@ def process_ansible_task_nodes(app, doctree, fromdocname):
         env.ansible_tasks = []
 
     if not hasattr(env, "ansible_results"):
-        env.ansible_results = runner.evaluate_tasks(env.ansible_tasks)
+        env.ansible_results = runner.evaluate_tasks(
+            env.ansible_tasks, roles_path=app.config.ansible_roles_path
+        )
 
     content = []
     for node in doctree.traverse(ansible_task_node):
@@ -187,7 +189,9 @@ def process_ansible_tasks_nodes(app, doctree, fromdocname):
         env.ansible_tasks = []
 
     if not hasattr(env, "ansible_results"):
-        env.ansible_results = runner.evaluate_tasks(env.ansible_tasks)
+        env.ansible_results = runner.evaluate_tasks(
+            env.ansible_tasks, roles_path=app.config.ansible_roles_path
+        )
 
     content = []
     for node in doctree.traverse(ansible_tasks_node):
@@ -215,7 +219,9 @@ def process_ansible_playbook_nodes(app, doctree, fromdocname):
 
     for playbook_id, content in env.ansible_playbooks.items():
         play_file = runner.write_play(content)
-        env.ansible_results[playbook_id] = runner.run_playbook(play_file)
+        env.ansible_results[playbook_id] = runner.run_playbook(
+            play_file, roles_path=app.config.ansible_roles_path
+        )
 
     content = []
     for node in doctree.traverse(ansible_playbook_node):
@@ -226,7 +232,7 @@ def process_ansible_playbook_nodes(app, doctree, fromdocname):
 
 
 def setup(app):
-    app.add_config_value("ansible_task_include_ansible_tasks", False, "html")
+    app.add_config_value("ansible_roles_path", [], "html")
     app.add_node(ansible_task_node,)
 
     app.add_directive("ansible-task", AnsibleTaskDirective)

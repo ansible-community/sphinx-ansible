@@ -34,6 +34,13 @@ This extensions add the following new extensions:
 - `ansible-hidden-tasks`: a bunch of hidden tasks, for instance to run some `assert` checks or prepare a configuration
 - `ansible-playbook`: for a full playbook
 
+Configuration keys
+==================
+
+The extension exposes the following configuration keys:
+
+- `ansible_roles_path`: The key accepts a list of folders.
+
 ********
 examples
 ********
