@@ -24,6 +24,15 @@ Sphinx-Ansible helps you address the following scenarios:
        state: touch
 
 
+Installation
+============
+
+Install the ``sphinx-ansible`` package and the extension in your ``conf.py`` file:
+
+.. code-block:: python
+
+    extensions = ["sphinxcontrib.sphinx_ansible"]
+
 New directives
 ==============
 
@@ -41,6 +50,12 @@ The extension exposes the following configuration keys:
 
 - `ansible_roles_path`: The key accepts a list of folders.
 - `ansible_tmp_dir`: Where to write the temporary Playbook. e.g: ``/tmp/sphinx-ansible``.
+
+
+Contribute
+==========
+
+The extension is hosted on Github: https://github.com/ansible-community/sphinx-ansible
 
 ********
 examples
