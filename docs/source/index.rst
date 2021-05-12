@@ -11,7 +11,8 @@ Sphinx-Ansible helps you address the following scenarios:
 - I want to run my Ansible documentation in a CI.
 - I would like to integrate some task outputs in my documentation.
 
-.. ansible-hidden-tasks::
+.. ansible-tasks::
+   :hide:
 
    - name: Prepare test directory
      file:
@@ -40,7 +41,6 @@ This extensions add the following new extensions:
 
 - `ansible-task`: for one single task
 - `ansible-tasks`: for a list of tasks
-- `ansible-hidden-tasks`: a bunch of hidden tasks, for instance to run some `assert` checks or prepare a configuration
 - `ansible-playbook`: for a full playbook
 
 Configuration keys
@@ -81,6 +81,23 @@ Sphinx will generate the following output
 
    - name: foo bar
      command: ls /tmp/foo/BAR
+
+It's also possible to hide a task with the `:hide:` parameter:
+
+.. code-block:: RST
+
+  .. ansible-task::
+     :hide:
+
+     - name: This is irrelevant for the final document
+       command: ls .
+
+.. ansible-task::
+   :hide:
+
+   - name: this is irrelevant for the final document
+     command: ls .
+
 
 A list of tasks
 ===============

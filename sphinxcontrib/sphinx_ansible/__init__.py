@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
 from docutils import nodes
-from docutils.parsers.rst import Directive
+from docutils.parsers.rst import Directive, directives
+
 
 from sphinx.util.docutils import SphinxDirective
 from sphinx.errors import ExtensionError
@@ -9,14 +10,6 @@ from sphinx.errors import ExtensionError
 import json
 import sphinxcontrib.sphinx_ansible.runner as runner
 import yaml
-
-
-class ansible_hidden_tasks_node(nodes.paragraph):
-    pass
-
-
-class ansible_task_node(nodes.paragraph):
-    pass
 
 
 class ansible_tasks_node(nodes.paragraph):
@@ -27,36 +20,13 @@ class ansible_playbook_node(nodes.paragraph):
     pass
 
 
-class AnsibleHiddenTasksDirective(SphinxDirective):
-
-    has_content = True
-
-    def run(self):
-        task_id = "ansible_task-%s-%d-%d" % (
-            self.env.docname,
-            self.lineno,
-            self.env.new_serialno("ansible_task"),
-        )
-
-        if not hasattr(self.env, "ansible_tasks"):
-            self.env.ansible_tasks = []
-
-        yaml_data = yaml.load("\n".join(self.content), Loader=yaml.FullLoader)
-
-        for task in yaml_data:
-            self.env.ansible_tasks.append(
-                {
-                    "docname": self.env.docname,
-                    "lineno": self.lineno,
-                    "task": dict(task),
-                }
-            )
-        my_ansible_hidden_tasks_node = ansible_hidden_tasks_node()
-        return [my_ansible_hidden_tasks_node]
-
-
 class AnsibleTasksDirective(SphinxDirective):
     has_content = True
+    has_content = True
+    optional_arguments = 1
+    option_spec = {
+        "hide": directives.flag,  # Shall the block be hidden?
+    }
 
     def run(self):
         task_ids = []
@@ -80,6 +50,8 @@ class AnsibleTasksDirective(SphinxDirective):
             )
 
         my_ansible_tasks_node = ansible_tasks_node()
+        if self.options.get("hide", False) is None:  # None: hide==True 😐...
+            return []
         para_1 = nodes.paragraph()
         literal = nodes.literal_block(code, code)
         literal["language"] = "yaml"
@@ -162,9 +134,9 @@ def process_ansible_tasks_nodes(app, doctree, fromdocname):
             tmp_dir=app.config.ansible_tmp_dir,
         )
 
-    for node in doctree.traverse(ansible_task_node) + doctree.traverse(
-        ansible_tasks_node
-    ):
+    for node in doctree.traverse(ansible_tasks_node):
+        if not node:  # hidden
+            return
         for task_id in node[1].get("ids"):
             result_data = env.ansible_results.get(task_id)
             if not result_data:
@@ -205,11 +177,9 @@ def process_ansible_playbook_nodes(app, doctree, fromdocname):
 def setup(app):
     app.add_config_value("ansible_roles_path", [], "html")
     app.add_config_value("ansible_tmp_dir", "tmp_dir_sphinx_ansible", "html")
-    app.add_node(ansible_task_node,)
 
     app.add_directive("ansible-task", AnsibleTasksDirective)
     app.add_directive("ansible-tasks", AnsibleTasksDirective)
-    app.add_directive("ansible-hidden-tasks", AnsibleHiddenTasksDirective)
     app.add_directive("ansible-playbook", AnsiblePlaybookDirective)
     app.connect("doctree-resolved", process_ansible_tasks_nodes)
     app.connect("doctree-resolved", process_ansible_playbook_nodes)
