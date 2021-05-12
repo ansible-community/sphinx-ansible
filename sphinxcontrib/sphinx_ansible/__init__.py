@@ -141,7 +141,12 @@ def process_ansible_tasks_nodes(app, doctree, fromdocname):
             result_data = env.ansible_results.get(task_id)
             if not result_data:
                 return
-            for i in ["_ansible_no_log", "invocation"]:
+            for i in [
+                "_ansible_no_log",
+                "invocation",
+                "_ansible_verbose_always",
+                "_debug_info",
+            ]:
                 if i in result_data:
                     del result_data[i]
             result_string = json.dumps(result_data, sort_keys=True, indent=4)
