@@ -5,20 +5,24 @@ import yaml
 import docutils.parsers.rst
 import docutils.core
 from sphinx.errors import ExtensionError
+from sphinx.util import logging
 
 import ansible_runner
+
+
+logger = logging.getLogger(__name__)
 
 
 def write_play(play_content, tmp_dir):
     tmp_dir = pathlib.Path(tmp_dir)
     tmp_dir.mkdir(exist_ok=True)
     temp_file = tmp_dir / "temp_file.yaml"
-
     temp_file.write_text(play_content)
     return temp_file
 
 
 def run_playbook(play_file, roles_path=None):
+    logger.info("[ansible_runner] Running: {}".format(play_file))
     r = ansible_runner.run(
         private_data_dir=str(play_file.parent),
         playbook=play_file.name,

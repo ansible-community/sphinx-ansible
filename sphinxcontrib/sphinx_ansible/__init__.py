@@ -34,8 +34,20 @@ class AnsibleTasksDirective(SphinxDirective):
         if not hasattr(self.env, "ansible_tasks"):
             self.env.ansible_tasks = []
 
-        yaml_data = yaml.load("\n".join(self.content), Loader=yaml.FullLoader)
+        try:
+            yaml_data = yaml.load("\n".join(self.content), Loader=yaml.FullLoader)
+        except yaml.error.MarkedYAMLError as e:
+            raise ExtensionError(
+                "Cannot parse the YAML of an Ansible block at: %s:%d\n  %s"
+                % (self.env.docname, self.lineno, e)
+            )
         code = "\n".join(self.content)
+
+        if not yaml_data:
+            raise ExtensionError(
+                "The Ansible block at: %s:%d doesn't have any content."
+                % (self.env.docname, self.lineno)
+            )
 
         for task in yaml_data:
             task_id = "ansible_task-%s-%d-%d" % (
