@@ -1,3 +1,7 @@
 example/source/tmp/temp_file.yaml
 docs/source/tmp
 docs/build/
+dist
+build
+**/fact_cache
+tmp
