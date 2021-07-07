@@ -22,7 +22,6 @@ class ansible_playbook_node(nodes.paragraph):
 
 class AnsibleTasksDirective(SphinxDirective):
     has_content = True
-    has_content = True
     optional_arguments = 1
     option_spec = {
         "hide": directives.flag,  # Shall the block be hidden?
@@ -62,7 +61,7 @@ class AnsibleTasksDirective(SphinxDirective):
             )
 
         my_ansible_tasks_node = ansible_tasks_node()
-        if self.options.get("hide", False) is None:  # None: hide==True 😐...
+        if "hide" in self.options:
             return []
         para_1 = nodes.paragraph()
         literal = nodes.literal_block(code, code)
