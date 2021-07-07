@@ -68,7 +68,7 @@ class AnsibleTasksDirective(SphinxDirective):
         literal["language"] = "yaml"
         para_1 += literal
         para_2 = nodes.paragraph(ids=task_ids)
-        para_2 += nodes.Text("response", "response")
+        para_2 += nodes.Text("Response:", "Response:")
         my_ansible_tasks_node += para_1
         my_ansible_tasks_node += para_2
         return [my_ansible_tasks_node]
@@ -95,7 +95,7 @@ class AnsiblePlaybookDirective(SphinxDirective):
         literal["language"] = "yaml"
         para_1 += literal
         para_2 = nodes.paragraph(ids=[playbook_id])
-        para_2 += nodes.Text("response", "response")
+        para_2 += nodes.Text("Response:", "Response:")
         my_ansible_playbook_node += para_1
         my_ansible_playbook_node += para_2
         return [my_ansible_playbook_node]
