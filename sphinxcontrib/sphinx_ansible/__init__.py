@@ -20,6 +20,46 @@ class ansible_playbook_node(nodes.paragraph):
     pass
 
 
+def wrap_in_one_cell_tab(node):
+    table = nodes.table()
+    group = nodes.tgroup("", cols=1)
+    group.append(nodes.colspec("", colwidth=10))
+    table.append(group)
+    body = nodes.tbody("")
+    row = nodes.row("")
+    body.append(row)
+    row.append(nodes.entry("", node))
+    group.append(body)
+    return table
+
+
+def build_directive_output(code, anchor, use_one_cell_tab=False):
+    result_node = ansible_tasks_node()
+    if use_one_cell_tab:
+        para_1 = nodes.paragraph()
+        literal = nodes.literal_block(code, code)
+        literal["language"] = "yaml"
+        para_1 += wrap_in_one_cell_tab(literal)
+        para_2 = nodes.paragraph()
+        para_2 += nodes.Text("Response:", "Response:")
+        para_3 = nodes.paragraph()
+        para_3 += wrap_in_one_cell_tab(nodes.paragraph(ids=[anchor]))
+        result_node += para_1
+        result_node += para_2
+        result_node += para_3
+
+    else:
+        para_1 = nodes.paragraph()
+        literal = nodes.literal_block(code, code)
+        literal["language"] = "yaml"
+        para_1 += literal
+        para_2 = nodes.paragraph(ids=[anchor])
+        para_2 += nodes.Text("Response:", "Response:")
+        result_node += para_1
+        result_node += para_2
+    return [result_node]
+
+
 class AnsibleTasksDirective(SphinxDirective):
     has_content = True
     optional_arguments = 1
@@ -60,22 +100,19 @@ class AnsibleTasksDirective(SphinxDirective):
                 {"docname": self.env.docname, "lineno": self.lineno, "task": task}
             )
 
-        my_ansible_tasks_node = ansible_tasks_node()
         if "hide" in self.options:
             return []
-        para_1 = nodes.paragraph()
-        literal = nodes.literal_block(code, code)
-        literal["language"] = "yaml"
-        para_1 += literal
-        para_2 = nodes.paragraph(ids=task_ids)
-        para_2 += nodes.Text("Response:", "Response:")
-        my_ansible_tasks_node += para_1
-        my_ansible_tasks_node += para_2
-        return [my_ansible_tasks_node]
+        return build_directive_output(
+            code, anchor=task_id, use_one_cell_tab=self.config.ansible_use_one_cell_tab
+        )
 
 
 class AnsiblePlaybookDirective(SphinxDirective):
     has_content = True
+    optional_arguments = 1
+    option_spec = {
+        "hide": directives.flag,  # Shall the block be hidden?
+    }
 
     def run(self):
         playbook_id = "ansible_playbook-%d" % self.env.new_serialno("ansible_task")
@@ -89,16 +126,13 @@ class AnsiblePlaybookDirective(SphinxDirective):
             "code": code,
         }
 
-        my_ansible_playbook_node = ansible_playbook_node()
-        para_1 = nodes.paragraph()
-        literal = nodes.literal_block(code, code)
-        literal["language"] = "yaml"
-        para_1 += literal
-        para_2 = nodes.paragraph(ids=[playbook_id])
-        para_2 += nodes.Text("Response:", "Response:")
-        my_ansible_playbook_node += para_1
-        my_ansible_playbook_node += para_2
-        return [my_ansible_playbook_node]
+        if "hide" in self.options:
+            return []
+        return build_directive_output(
+            code,
+            anchor=playbook_id,
+            use_one_cell_tab=self.config.ansible_use_one_cell_tab,
+        )
 
 
 def purge_ansible_tasks(app, env, docname):
@@ -146,9 +180,11 @@ def process_ansible_tasks_nodes(app, doctree, fromdocname):
         )
 
     for node in doctree.traverse(ansible_tasks_node):
-        if not node:  # hidden
-            return
-        for task_id in node[1].get("ids"):
+        if app.config.ansible_use_one_cell_tab:
+            target_p = node[2][0][0][1][0][0][0]
+        else:
+            target_p = node[1]
+        for task_id in target_p.get("ids"):
             result_data = env.ansible_results.get(task_id)
             if not result_data:
                 return
@@ -163,7 +199,7 @@ def process_ansible_tasks_nodes(app, doctree, fromdocname):
             result_string = json.dumps(result_data, sort_keys=True, indent=4)
             literal = nodes.literal_block(result_string, result_string)
             literal["language"] = "json"
-            node[1] += literal
+            target_p += literal
 
 
 def process_ansible_playbook_nodes(app, doctree, fromdocname):
@@ -184,15 +220,21 @@ def process_ansible_playbook_nodes(app, doctree, fromdocname):
         )
 
     for node in doctree.traverse(ansible_playbook_node):
-        playbook_id = node[1].get("ids")[0]
+        if app.config.ansible_use_one_cell_tab:
+            target_p = node[2][0][0][1][0][0][0]
+        else:
+            target_p = node[1]
+
+        playbook_id = target_p.get("ids")[0]
         result_string = env.ansible_results.get(playbook_id).stdout.read()
         literal = nodes.literal_block(result_string, result_string)
-        node[1] += literal
+        target_p += literal
 
 
 def setup(app):
     app.add_config_value("ansible_roles_path", [], "html")
     app.add_config_value("ansible_tmp_dir", "tmp_dir_sphinx_ansible", "html")
+    app.add_config_value("ansible_use_one_cell_tab", False, "html")
 
     app.add_directive("ansible-task", AnsibleTasksDirective)
     app.add_directive("ansible-tasks", AnsibleTasksDirective)
