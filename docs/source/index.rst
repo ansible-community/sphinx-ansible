@@ -34,6 +34,12 @@ Install the ``sphinx-ansible`` package and the extension in your ``conf.py`` fil
 
     extensions = ["sphinxcontrib.sphinx_ansible"]
 
+
+Configuration
+=============
+
+- ``ansible_use_one_cell_tab`` (default: ``False``): expose the result in a table with one single cell.
+
 New directives
 ==============
 
